@@ -460,6 +460,39 @@ char *gadget_status_json(void)
     esp_wifi_ap_get_sta_list(&clients);
     cJSON_AddNumberToObject(o, "clients", clients.num);
 
+    /* Tailnet peers from the control-plane netmap. online is Tailscale's own view of the
+     * peer, direct_path distinguishes direct UDP from DERP relay. The peer table is
+     * capped at CONFIG max_peers (default 16), so a huge tailnet reports at most that. */
+    cJSON *peers = cJSON_CreateArray();
+    int p_total = 0, p_online = 0;
+    if (peers) {
+        int n = tn ? tailtiny_get_peer_count(s_ml) : 0;
+        for (int i = 0; i < n; i++) {
+            tailtiny_peer_info_t pi;
+            if (tailtiny_get_peer_info(s_ml, i, &pi) != ESP_OK) {
+                continue;
+            }
+            if (pi.online) {
+                p_online++;
+            }
+            cJSON *p = cJSON_CreateObject();
+            if (!p) {
+                break;
+            }
+            char pip[16];
+            tailtiny_ip_to_str(pi.vpn_ip, pip);
+            cJSON_AddStringToObject(p, "ip", pip);
+            cJSON_AddStringToObject(p, "host", pi.hostname);
+            cJSON_AddBoolToObject(p, "online", pi.online);
+            cJSON_AddBoolToObject(p, "direct", pi.direct_path);
+            cJSON_AddItemToArray(peers, p);
+            p_total++;
+        }
+        cJSON_AddItemToObject(o, "peers", peers);
+    }
+    cJSON_AddNumberToObject(o, "peers_total", p_total);
+    cJSON_AddNumberToObject(o, "peers_online", p_online);
+
     char *json = cJSON_PrintUnformatted(o);
     cJSON_Delete(o);
     return json;

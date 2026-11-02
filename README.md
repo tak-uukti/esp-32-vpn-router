@@ -115,6 +115,20 @@ clean identity: `idf.py -p /dev/ttyACM0 erase-flash`.
 4. The AP follows the uplink's channel, so reconnect once. From then on clients get both
    internet and tailnet.
 
+The status panel on that page (and `GET /status.json`) also lists the tailnet devices the
+gadget can see, with how many are online:
+
+```
+Tailnet devices: 2 online / 3 total
+  laptop.example-tailnet.ts.net   100.64.0.11   online direct
+  server.example-tailnet.ts.net   100.64.0.12   online direct
+  phone.example-tailnet.ts.net    100.64.0.13   offline
+```
+
+`online` is Tailscale's own view from the control-plane netmap, not a probe by the gadget, so
+it reflects whether the device is registered as up. The list is capped by the peer table
+(`max_peers`, 16 by default), so a large tailnet reports at most that many entries.
+
 Values saved on the setup page live in NVS (namespace `gadget`) and override Kconfig after a
 reboot. `idf.py erase-flash` resets them.
 
