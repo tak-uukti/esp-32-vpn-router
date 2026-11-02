@@ -1,0 +1,36 @@
+# Shared settings for tailnet-gadget (any ESP32 with WiFi + USB-OTG-capable chip preferred)
+# TailTiny's own requirements, copied from its basic_connect example, plus routing.
+
+# --- lwIP: WireGuard needs raw sockets, router mode needs forwarding + NAPT ---
+CONFIG_LWIP_MAX_SOCKETS=16
+CONFIG_LWIP_SO_RCVBUF=y
+CONFIG_LWIP_TCPIP_RECVMBOX_SIZE=32
+CONFIG_LWIP_IP_FORWARD=y
+CONFIG_LWIP_IPV4_NAPT=y
+CONFIG_LWIP_DHCPS=y
+
+# --- mbedTLS: Noise protocol / WireGuard ciphers ---
+CONFIG_MBEDTLS_CHACHA20_C=y
+CONFIG_MBEDTLS_POLY1305_C=y
+CONFIG_MBEDTLS_CHACHAPOLY_C=y
+CONFIG_MBEDTLS_HKDF_C=y
+CONFIG_MBEDTLS_SSL_PROTO_TLS1_2=y
+CONFIG_MBEDTLS_DYNAMIC_BUFFER=y
+
+# --- WiFi: AP + STA at once (this is the whole point) ---
+CONFIG_ESP_WIFI_SOFTAP_SUPPORT=y
+CONFIG_ESP_WIFI_AMPDU_TX_ENABLED=n
+CONFIG_ESP_WIFI_AMPDU_RX_ENABLED=n
+
+# --- FreeRTOS / watchdog (extended for TLS handshakes) ---
+CONFIG_FREERTOS_HZ=1000
+CONFIG_FREERTOS_TIMER_TASK_STACK_DEPTH=4096
+CONFIG_ESP_TASK_WDT_TIMEOUT_S=30
+
+# --- Flash layout / logs ---
+CONFIG_PARTITION_TABLE_SINGLE_APP_LARGE=y
+CONFIG_LOG_DEFAULT_LEVEL_INFO=y
+
+# Modern browsers send far more than the 512-byte default; without this the setup
+# page fails with HTTP 431 "Header fields are too long".
+CONFIG_HTTPD_MAX_REQ_HDR_LEN=2048

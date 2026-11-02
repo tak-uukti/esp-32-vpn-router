@@ -1,0 +1,10 @@
+# Classic ESP32 (no PSRAM): AP-only transport, smaller coordination buffers.
+# TailTiny's own non-PSRAM guidance: 64KB H2/JSON buffers are enough for ~30 peers.
+
+CONFIG_ML_H2_BUFFER_SIZE_KB=64
+CONFIG_ML_JSON_BUFFER_SIZE_KB=64
+CONFIG_ML_MAX_PEERS=8
+
+CONFIG_ESP_DEFAULT_CPU_FREQ_MHZ_240=y
+CONFIG_ESP_WIFI_STATIC_RX_BUFFER_NUM=6
+CONFIG_ESP_WIFI_DYNAMIC_RX_BUFFER_NUM=16

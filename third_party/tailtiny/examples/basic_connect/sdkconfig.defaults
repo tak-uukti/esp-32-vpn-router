@@ -1,0 +1,37 @@
+# TailTiny basic_connect: settings for every ESP32 chip.
+# Chip-specific extras live in sdkconfig.defaults.<chip> (e.g. .esp32s3),
+# which ESP-IDF loads automatically after `idf.py set-target <chip>`.
+# Buffer sizes are picked automatically: large with PSRAM, small without.
+
+# lwIP (WireGuard needs raw sockets + larger buffers)
+CONFIG_LWIP_MAX_SOCKETS=16
+CONFIG_LWIP_SO_RCVBUF=y
+CONFIG_LWIP_TCPIP_RECVMBOX_SIZE=32
+
+# mbedTLS (Noise protocol needs ChaCha20-Poly1305)
+CONFIG_MBEDTLS_CHACHA20_C=y
+CONFIG_MBEDTLS_POLY1305_C=y
+CONFIG_MBEDTLS_CHACHAPOLY_C=y
+CONFIG_MBEDTLS_HKDF_C=y
+CONFIG_MBEDTLS_SSL_PROTO_TLS1_2=y
+CONFIG_MBEDTLS_DYNAMIC_BUFFER=y
+
+# FreeRTOS
+CONFIG_FREERTOS_HZ=1000
+CONFIG_FREERTOS_TIMER_TASK_STACK_DEPTH=4096
+
+# WiFi: low-latency tuning for WireGuard traffic
+CONFIG_ESP_WIFI_AMPDU_TX_ENABLED=n
+CONFIG_ESP_WIFI_AMPDU_RX_ENABLED=n
+
+# Watchdog (extended for TLS handshakes)
+CONFIG_ESP_TASK_WDT_TIMEOUT_S=30
+
+# Partition table
+CONFIG_PARTITION_TABLE_SINGLE_APP_LARGE=y
+
+# Log level
+CONFIG_LOG_DEFAULT_LEVEL_INFO=y
+
+# Priority peer (guaranteed WG slot even when peer table is full)
+CONFIG_ML_PRIORITY_PEER_IP=""

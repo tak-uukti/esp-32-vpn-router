@@ -1,0 +1,72 @@
+menu "Tailnet Gadget"
+
+    config GADGET_WIFI_SSID
+        string "Uplink WiFi SSID"
+        default ""
+        help
+            WiFi network the gadget joins to reach the internet and Tailscale.
+
+    config GADGET_WIFI_PASSWORD
+        string "Uplink WiFi password"
+        default ""
+
+    config GADGET_TS_AUTH_KEY
+        string "Tailscale auth key (tskey-auth-...)"
+        default ""
+        help
+            Tagged, non-ephemeral, non-reusable key. Use a tag with a narrow ACL so a
+            lost gadget cannot reach anything but the hosts you name.
+
+    config GADGET_DEVICE_NAME
+        string "Tailnet hostname for the gadget"
+        default "tailnet-gadget"
+
+    config GADGET_AP_SSID
+        string "AP SSID (what you join from the client device)"
+        default "tailnet-gadget"
+
+    config GADGET_AP_PASSWORD
+        string "AP password (WPA2, 8-63 chars)"
+        default "changeme12345"
+
+    config GADGET_AP_CHANNEL
+        int "AP channel (0 = follow upstream STA channel)"
+        range 0 13
+        default 0
+
+    config GADGET_AP_MAX_CLIENTS
+        int "Max AP clients"
+        range 1 8
+        default 4
+
+    config GADGET_STATUS_INTERVAL_S
+        int "Status log interval (seconds)"
+        default 30
+
+    config GADGET_NAPT_TEST
+        bool "Inject a synthetic client packet to test NAPT forwarding"
+        default n
+        help
+            Builds a UDP datagram that looks like it came from a 192.168.4.50 client
+            and feeds it to ip4_input on the AP interface, then logs the result. Proves
+            the client-to-tailnet forwarding path without a second device: watch for
+            "NAPT-TEST" arriving at the destination tailnet host.
+
+    config GADGET_NAPT_TEST_TARGET
+        string "Destination IPv4 for the NAPT injection test"
+        depends on GADGET_NAPT_TEST
+        default ""
+        help
+            A host on your own tailnet, e.g. 100.64.0.10. The injected packet uses a
+            bogus LAN source (192.168.4.50), so the destination must be reachable through
+            the WireGuard netif or the test proves nothing.
+
+    config GADGET_SELFTEST
+        bool "Run on-device self-test at boot"
+        default n
+        help
+            Fetches the setup page and /scan.json over the AP interface and resolves a
+            DNS name against the catch-all responder, logging PASS/FAIL each. Proves the
+            provisioning path without needing a second device to join the AP.
+
+endmenu
